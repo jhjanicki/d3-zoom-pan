@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+path {
+  fill: #E5F5F9;
+  stroke: #2CA25F;
+  stroke-width: 0.5;
+}
+#axes {
+  stroke: #BDBDBD;
+  stroke-width: 0.5;
+}
+
+.dot{
+	fill:black;
+	z-index: 9999;
+}
+
+.d3-tip {
+        line-height: 1;
+        font-weight: bold;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 10px 10px 10px 10px;
+        -moz-border-radius: 10px 10px 10px 10px;
+        -webkit-border-radius: 10px 10px 10px 10px;
+        /* border: 1px solid #ffffff; */
+        font-family: 'Dosis', sans-serif;
+        text-align: center;
+        
+        -webkit-box-shadow: 1px 1px 15px 4px rgba(0,0,0,0.75);
+        -moz-box-shadow: 1px 1px 15px 4px rgba(0,0,0,0.75);
+		box-shadow: 1px 1px 15px 4px rgba(0,0,0,0.75);
+      }
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+
+
+/* TOOLTIP */
+
+.tooltip-species {
+  display: block;
+  font-weight: bold;
+  font-size: 120%;
+  width: 100%;
+  text-align: center;
+  border-radius: 3px;
+} 
+
+
+</style>
+<body>
+
+<form id="query">
+<label> Genus </label>
+<select id="genus-select" name="genus">
+<option value="Select-Genus">Select Genus:</option>
+</select>
+
+<label> Species </label>
+<select id="species-select" name="species">
+<option value="Select-Species">Select Species:</option>
+</select>
+</form>
+
+<p id="results">
+</p>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://underscorejs.org/underscore-min.js"></script>
+
+<script>
+
+(function() {
+
+
+var recordsJSON = {
+  "records": [
+  {
+      "GABI_Acc_Number": "GABI_00862248",
+      "genus_name_valid": "Azteca",
+      "species_name_valid": "schumannii dubia",
+      "subspecies_name_valid": null,
+      "dec_lat":  38.478518,
+      "dec_long": -122.852768,
+      "country": "United States of America",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":3
+  },{
+      "GABI_Acc_Number": "GABI_00862248",
+      "genus_name_valid": "Azteca",
+      "species_name_valid": "schumannii dubia",
+      "subspecies_name_valid": null,
+      "dec_lat":  -14.232402,
+      "dec_long": -48.930945,
+      "country": "Brazil",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":2
+  }, {
+      "GABI_Acc_Number": "GABI_00862249",
+      "genus_name_valid": "Azteca",
+      "species_name_valid": "angusticeps",
+      "subspecies_name_valid": null,
+      "dec_lat": -14.232402,
+      "dec_long": -48.930945,
+      "country": "Brazil",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":2
+  }, {
+      "GABI_Acc_Number": "GABI_00862250",
+      "genus_name_valid": "Azteca",
+      "species_name_valid": "trigona mathildae",
+      "subspecies_name_valid": null,
+      "dec_lat":  -7.900368,
+      "dec_long": -76.642808,
+      "country": "Peru",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":5
+  }, {
+      "GABI_Acc_Number": "GABI_00862251",
+      "genus_name_valid": "Dorymyrmex",
+      "species_name_valid": "pyramicus",
+      "subspecies_name_valid": null,
+      "dec_lat":  -4.211714,
+      "dec_long": -65.125266,
+      "country": "Brazil",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":2
+  }, {
+      "GABI_Acc_Number": "GABI_00862252",
+      "genus_name_valid": "Myrmelachista",
+      "species_name_valid": "bambusarum",
+      "subspecies_name_valid": null,
+      "dec_lat":  15.814138,
+      "dec_long": -90.101026,
+      "country": "Guatemala",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":1
+  }, {
+      "GABI_Acc_Number": "GABI_00862253",
+      "genus_name_valid": "Tetraponera",
+      "species_name_valid": "rufonigra",
+      "subspecies_name_valid": null,
+      "dec_lat": 25.45,
+      "dec_long": 81.75,
+      "country": "India",
+      "bentity_name_2": "Uttar Pradesh",
+      "bentity_name_3": "North India",
+      "num_records_in_country":2
+  }, {
+      "GABI_Acc_Number": "GABI_00862254",
+      "genus_name_valid": "Nylanderia",
+      "species_name_valid": "fulva",
+      "subspecies_name_valid": null,
+      "dec_lat":  22.209500,
+      "dec_long": -104.813214,
+      "country": "Mexico",
+      "bentity_name_2": "Amazonas_Brazil",
+      "bentity_name_3": "Amazonas_Brazil",
+      "num_records_in_country":5
+  }, {
+      "GABI_Acc_Number": "GABI_00862255",
+      "genus_name_valid": "Acanthostichus",
+      "species_name_valid": "brevicornis",
+      "subspecies_name_valid": null,
+      "dec_lat": -12.505208,
+      "dec_long": 135.877153,
+      "country": "Australia",
+      "bentity_name_2": "Paraiba",
+      "bentity_name_3": "Paraiba",
+      "num_records_in_country":4
+  }, {
+      "GABI_Acc_Number": "GABI_00862256",
+      "genus_name_valid": "Gnamptogenys",
+      "species_name_valid": "annulata",
+      "subspecies_name_valid": null,
+      "dec_lat": -23.517851,
+      "dec_long": 114.834907,
+      "country": "Australia",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":4
+  }, {
+      "GABI_Acc_Number": "GABI_00862257",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "commutata",
+      "subspecies_name_valid": null,
+      "dec_lat": 23.903550,
+      "dec_long": 120.409834,
+      "country": "Taiwan",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":6
+  }, {
+      "GABI_Acc_Number": "GABI_00862258",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "apicalis",
+      "subspecies_name_valid": null,
+      "dec_lat": 26.357151,
+      "dec_long": 127.813789,
+      "country": "Japan",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":7
+  }, {
+      "GABI_Acc_Number": "GABI_00862259",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "apicalis",
+      "subspecies_name_valid": null,
+      "dec_lat": 35.735189,
+      "dec_long": 139.976251,
+      "country": "Japan",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":7
+  }, {
+      "GABI_Acc_Number": "GABI_00862260",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "unidentata",
+      "subspecies_name_valid": null,
+      "dec_lat":  47.777514,
+      "dec_long":  32.635253,
+      "country": "Ukraine",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":9
+  }, {
+      "GABI_Acc_Number": "GABI_00862261",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "villosa",
+      "subspecies_name_valid": null,
+      "dec_lat":  44.483665,
+      "dec_long": 5.305789,
+      "country": "France",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":10
+  }, {
+      "GABI_Acc_Number": "GABI_00862262",
+      "genus_name_valid": "Neoponera",
+      "species_name_valid": "moesta",
+      "subspecies_name_valid": null,
+      "dec_lat":  42.996899,
+      "dec_long": -89.364138,
+      "country": "United States of America",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":3
+  }, {
+      "GABI_Acc_Number": "GABI_00862263",
+      "genus_name_valid": "Pachycondyla",
+      "species_name_valid": "harpax",
+      "subspecies_name_valid": null,
+      "dec_lat":  27.840155,
+      "dec_long": -81.229957,
+      "country": "United States of America",
+      "bentity_name_2": "Rondonia",
+      "bentity_name_3": "Rondonia",
+      "num_records_in_country":3
+  }
+ ]
+};
+
+
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
+
+loadDropDown();
+
+function loadDropDown(){
+
+		var existing_genera = [];
+		
+		for(var field=0; field<recordsJSON.records.length;field++){
+			
+			
+			//use _.contains to make the genera unique	
+			if(!_.contains(existing_genera, recordsJSON.records[field].genus_name_valid)){
+			  $('#genus-select').append(
+		        $('<option></option>').val(recordsJSON.records[field].genus_name_valid).html(recordsJSON.records[field].genus_name_valid)
+		      );
+		    }
+		      existing_genera.push(recordsJSON.records[field].genus_name_valid);
+		           
+		}
+		 //now we need to only get unique genera
+		 
+		 
+		 $("#genus-select").change(function () {
+		    $('#species-select').empty().append($('<option></option>').val('Select-Species').html('Select Species'));
+		    
+		    var matchVal = $("#genus-select option:selected").text();
+		    
+		    var existing_species=[];
+		    
+		    recordsJSON.records.filter(function (record) {
+		        if (record.genus_name_valid == matchVal) {//if the genus matches
+		        
+		        //and if doens't exist yet...get unique species
+		        	if(!_.contains(existing_species, record.species_name_valid)){
+		            $("#species-select").append($('<option></option>').val(record.species_name_valid).html(record.species_name_valid));
+		            }
+		            
+		            existing_species.push(record.species_name_valid);
+		        }
+		    });
+		});
+
+}
+
+
+
+
+var width = 960,
+    height = 500,
+    projection = d3.geo.mercator(),
+    path = d3.geo.path().projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+      
+ 
+				    
+/* var  g = svg.append("g"); */
+
+	svg.call(d3.behavior.zoom()
+      .translate(projection.translate())
+      .scale(projection.scale())
+      .on("zoom", redraw));
+      
+      //if i change svg to g then it doesn't zoom
+
+
+
+
+var axes = svg.append("g").attr("id", "axes"),
+    xAxis = axes.append("line").attr("y2", height),
+    yAxis = axes.append("line").attr("x2", width);
+
+d3.json("world.geojson", function(error, json) {
+  
+svg.selectAll("path")
+      .data(json.features)
+    .enter().append("path");
+
+    
+    
+    
+/*
+    var group = svg.selectAll("g")
+        .data(json.features)
+        .enter()
+        .append("g");
+        
+     group.append("path")
+        .attr("d", path);   
+*/
+     
+    
+  redraw();
+});
+
+function redraw() {
+  if (d3.event) {
+    projection
+        .translate(d3.event.translate)
+        .scale(d3.event.scale);
+  }
+  svg.selectAll("path").attr("d", path);
+  var t = projection.translate();
+  xAxis.attr("x1", t[0]).attr("x2", t[0]);
+  yAxis.attr("y1", t[1]).attr("y2", t[1]);
+}
+
+
+
+
+function updateResults(){
+	var genus = $('#genus-select').val();
+	var species = $('#species-select').val();	
+	console.log("genus: "+ genus + "and species: "+species);
+	$( "#results" ).text( "Species selected: "+ genus + " "+species );
+	
+	
+	//can filter with underscore
+	var selected_insects = _.filter(recordsJSON.records, function(o) {
+	    return o.genus_name_valid === genus && o.species_name_valid === species;
+	});
+	
+	
+	console.log("selected insects");
+	console.log(selected_insects);
+	
+	
+
+	drawPoints(selected_insects);
+	
+
+	
+}//end updateResults
+
+$( "select" ).on( "change", updateResults );
+updateResults();
+
+
+function drawPoints(selected_insects){
+
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d) {
+	    return "<strong><i><span class='tooltip-species'>" +d.genus_name_valid+" "+ d.species_name_valid + "</span></i></strong><br> Total Records in "+ d.country+": "+d.num_records_in_country ;
+	});
+	
+	svg.call(tip);
+
+
+	
+	var circles = svg.selectAll('.dot')
+				.data(selected_insects);
+
+
+				
+		
+		//update
+		circles.transition()
+				.duration(2000)
+				.attr("r",6)
+				.attr("cx",function(d){
+					console.log([d.dec_long,d.dec_lat]);
+					return projection([d.dec_long,d.dec_lat])[0];
+				}) 
+				.attr("cy",function(d){
+					return projection([d.dec_long,d.dec_lat])[1];
+				})
+				.style("fill", "black");
+				
+			
+			//enter
+			circles.enter().append("circle")
+					.attr("class","dot")
+					.attr("cx",function(d){
+					console.log([d.dec_long,d.dec_lat]);
+					return projection([d.dec_long,d.dec_lat])[0];
+						}) 
+					.attr("cy",function(d){
+					return projection([d.dec_long,d.dec_lat])[1];
+						})
+					.attr("r",0)
+					.transition()
+					.duration(2000)
+					.attr("r",6);
+			
+			//exit
+			circles.exit()
+					.transition()
+					.duration(2000)
+					.attr("r",0)
+					.remove();
+					
+					
+					
+			circles.on('mouseover.border',function(){
+				d3.select(this)
+				.transition()
+				.duration(2000)
+				.style({
+					'stroke-width':10,
+					'stroke-opacity':0.3,
+					'fill-opacity':1,
+					'stroke':'white'
+				});
+			})
+			
+			.on('mouseout.border',function(){
+				d3.select(this)
+				.transition()
+				.duration(700)
+				.style({
+					'stroke-width':1,
+					'stroke-opacity':1,
+					'fill-opacity':1,
+					'stroke':'black'
+				});
+				
+			
+			})
+			
+			
+			circles
+			.on('mouseover', tip.show)
+			.on('mouseout', tip.hide)
+			.moveToFront();
+
+	
+}
+
+
+
+})();
+
+
+</script>
